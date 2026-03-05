@@ -4,8 +4,9 @@ SQLAlchemy==2.0.38
 psycopg2-binary==2.9.10
 alembic==1.14.1
 python-dotenv==1.0.1
-pydantic
+pydantic==2.10.6
 email-validator
 passlib[bcrypt]
 python-jose[cryptography]
+argon2-cffi
 
