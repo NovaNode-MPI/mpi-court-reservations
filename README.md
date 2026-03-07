@@ -31,7 +31,9 @@ Sports facilities are often booked informally (messages/phone calls), which can 
 
 - **Backend:** Python FastAPI (OpenAPI/Swagger)
 - **Database:** PostgreSQL
-- **Frontend:** TBD (Frontend champion will decide)
+- **Frontend:** HTML, CSS, JavaScript
+- **Tooling:** Vite
+- **Styling:** Plain CSS
 - **Testing:** TBD (QA champion will decide)
 - **CI/CD:** TBD (DevOps champion will decide)
 - **Docker:** TBD (DevOps champion will decide)
@@ -46,6 +48,15 @@ git clone https://github.com/NovaNode-MPI/mpi-court-reservations.git
 cd mpi-court-reservations
 docker compose up --build
 ```
+## Frontend Local Setup
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+This starts the frontend development server locally.
 
 ## 5. Workflow (short)
 
