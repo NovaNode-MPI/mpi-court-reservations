@@ -31,7 +31,7 @@ Sports facilities are often booked informally (messages/phone calls), which can 
 
 - **Backend:** Python FastAPI (OpenAPI/Swagger)
 - **Database:** PostgreSQL
-- **Frontend:** TBD (Frontend champion will decide)
+- **Frontend:** HTML, CSS, JavaScript
 - **Testing:** TBD (QA champion will decide)
 - **CI/CD:** TBD (DevOps champion will decide)
 - **Docker:** TBD (DevOps champion will decide)
