@@ -26,3 +26,13 @@ class UserResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class ReservationResponse(BaseModel):
+    id: int
+    facility_id: int
+    start_time: datetime
+    end_time: datetime
+    status: str
+
+    class Config:
+        from_attributes = True
