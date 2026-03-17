@@ -1,7 +1,7 @@
 from __future__ import annotations
 from datetime import datetime
 from pydantic import BaseModel, EmailStr, Field
-
+from typing import Optional
 
 
 class RegisterRequest(BaseModel):
@@ -40,6 +40,11 @@ class ReservationResponse(BaseModel):
     end_time: datetime
     status: str
     created_at: datetime
+class FacilityResponse(BaseModel):
+    id: int
+    name: str
+    type: str
+    location: Optional[str] = None
 
     class Config:
         from_attributes = True
