@@ -8,6 +8,10 @@ from app.routers.reservations import router as reservations_router
 from app.routers.facilities import router as facilities_router
 >>>>>>> main
 
+
+
+from app.routers.reservations import router as reservations_router
+
 app = FastAPI(title="MPI Court Reservations")
 app.include_router(auth_router)
 app.include_router(me_router)
@@ -16,6 +20,9 @@ app.include_router(reservations_router)
 =======
 app.include_router(facilities_router)
 >>>>>>> main
+
+
+app.include_router(reservations_router)
 
 
 @app.get("/health")

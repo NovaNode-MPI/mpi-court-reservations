@@ -27,6 +27,8 @@ class UserResponse(BaseModel):
     class Config:
         from_attributes = True
 
+class ReservationResponse(BaseModel):
+    id: int
 class ReservationCreateRequest(BaseModel):
     facility_id: int = Field(gt=0)
     start_time: datetime
