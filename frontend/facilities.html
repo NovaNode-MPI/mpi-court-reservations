@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Facilities</title>
+</head>
+<body>
+  <header style="padding: 20px; display: flex; justify-content: flex-end;">
+    <button id="logoutButton">Logout</button>
+  </header>
+
+  <main>
+    <h1>Facilities</h1>
+    <p>Welcome to the sports reservation app.</p>
+  </main>
+
+  <script type="module">
+    import { requireAuth, logout } from "/src/services/authGuard.js";
+
+    requireAuth();
+
+    const logoutButton = document.getElementById("logoutButton");
+    logoutButton.addEventListener("click", logout);
+  </script>
+</body>
+</html>
