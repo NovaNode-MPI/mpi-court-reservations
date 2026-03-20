@@ -1,4 +1,5 @@
 import { loginUser } from "../services/authService.js";
+import { getRedirectPath, clearRedirectPath } from "../services/authGuard.js";
 
 const loginForm = document.getElementById("loginForm");
 const emailInput = document.getElementById("email");
@@ -69,7 +70,14 @@ loginForm.addEventListener("submit", async (event) => {
     serverMessage.textContent = "Login successful.";
     serverMessage.classList.add("success");
 
-    loginForm.reset();
+    const redirectPath = getRedirectPath();
+
+if (redirectPath) {
+  clearRedirectPath();
+  window.location.href = redirectPath;
+} else {
+  window.location.href = "/index.html";
+}
   } catch (error) {
     serverMessage.textContent = error.message || "Login failed.";
   } finally {

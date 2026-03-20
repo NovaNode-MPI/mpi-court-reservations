@@ -11,7 +11,8 @@ from dotenv import load_dotenv
 # Alembic Config object
 config = context.config
 
-env_path = Path(__file__).resolve().parents[1] / ".env"
+# env_path = Path(__file__).resolve().parents[1] / ".env"
+env_path = Path(__file__).resolve().parents[2] / ".env.example"
 load_dotenv(dotenv_path=env_path)
 
 db_url = os.getenv("DATABASE_URL")

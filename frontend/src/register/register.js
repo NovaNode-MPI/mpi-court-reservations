@@ -76,10 +76,14 @@ registerForm.addEventListener("submit", async (event) => {
 
     const response = await registerUser({ email, password });
 
-    serverMessage.textContent = `Account created successfully for ${response.email}.`;
+    serverMessage.textContent = `Account created successfully for ${response.email}. Redirecting to login...`;
     serverMessage.classList.add("success");
 
     registerForm.reset();
+
+    setTimeout(() => {
+    window.location.href = "/login.html";
+    }, 1200);
   } catch (error) {
     if (error.fieldErrors) {
       if (error.fieldErrors.email) {
