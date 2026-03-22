@@ -58,6 +58,75 @@ def get_reservation_by_id(
     return schemas.ReservationResponse.model_validate(reservation)
 
 
+@router.put("/{reservation_id}", response_model=schemas.ReservationResponse, status_code=status.HTTP_200_OK)
+def update_reservation_time(
+    reservation_id: int,
+    payload: schemas.ReservationUpdateRequest,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+) -> schemas.ReservationResponse:
+    reservation = (
+        db.query(models.Reservation)
+        .filter(models.Reservation.id == reservation_id)
+        .first()
+    )
+
+    if reservation is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Reservation not found",
+        )
+
+    if reservation.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Forbidden",
+        )
+
+    now_utc = datetime.now(timezone.utc)
+
+    if payload.start_time < now_utc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="start_time must be in the future",
+        )
+
+    if not _is_valid_30_min_boundary(payload.start_time) or not _is_valid_30_min_boundary(payload.end_time):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="start_time and end_time must align to 30-minute boundaries",
+        )
+
+    if payload.start_time >= payload.end_time:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="start_time must be earlier than end_time",
+        )
+
+    overlapping = (
+        db.query(models.Reservation)
+        .filter(models.Reservation.facility_id == reservation.facility_id)
+        .filter(models.Reservation.status == models.RESERVATION_STATUS_ACTIVE)
+        .filter(models.Reservation.id != reservation_id)
+        .filter(models.Reservation.start_time < payload.end_time)
+        .filter(models.Reservation.end_time > payload.start_time)
+        .first()
+    )
+    if overlapping:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Time slot is already booked for this facility",
+        )
+
+    reservation.start_time = payload.start_time
+    reservation.end_time = payload.end_time
+
+    db.commit()
+    db.refresh(reservation)
+
+    return schemas.ReservationResponse.model_validate(reservation)
+
+
 @router.delete("/{reservation_id}", response_model=schemas.ReservationResponse, status_code=status.HTTP_200_OK)
 def cancel_reservation(
     reservation_id: int,
