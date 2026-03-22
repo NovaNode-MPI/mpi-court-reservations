@@ -4,24 +4,59 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Facilities</title>
+  <link rel="stylesheet" href="/src/facilities/facilities.css" />
 </head>
 <body>
-  <header style="padding: 20px; display: flex; justify-content: flex-end;">
-    <button id="logoutButton">Logout</button>
-  </header>
+  <header class="facilities-header">
+  <div class="search-row">
+    <div class="search-wrapper">
+      <input
+        type="text"
+        id="searchInput"
+        class="search-input"
+        placeholder="Search facilities..."
+        aria-label="Search facilities"
+      />
+    </div>
+  </div>
 
-  <main>
-    <h1>Facilities</h1>
-    <p>Welcome to the sports reservation app.</p>
+  <div class="actions-row">
+    <button id="accountButton" class="secondary-button" type="button">
+      Account
+    </button>
+
+    <button id="logoutButton" class="logout-button" type="button">
+      Logout
+    </button>
+  </div>
+</header>
+
+  <main class="facilities-page">
+    <section class="page-intro">
+      <h1>Available Facilities</h1>
+      <p>Choose a facility to view more details.</p>
+    </section>
+
+    <section id="loadingState" class="state-message">
+      <p>Loading facilities...</p>
+    </section>
+
+    <section id="errorState" class="state-message hidden">
+      <p>Could not load facilities. Please try again.</p>
+      <button id="retryButton" type="button" class="retry-button">Retry</button>
+    </section>
+
+    <section id="emptyState" class="state-message hidden">
+      <p>No facilities available at the moment.</p>
+    </section>
+
+    <section
+      id="facilitiesGrid"
+      class="facilities-grid hidden"
+      aria-live="polite"
+    ></section>
   </main>
 
-  <script type="module">
-    import { requireAuth, logout } from "/src/services/authGuard.js";
-
-    requireAuth();
-
-    const logoutButton = document.getElementById("logoutButton");
-    logoutButton.addEventListener("click", logout);
-  </script>
+  <script type="module" src="/src/facilities/facilities.js"></script>
 </body>
 </html>
