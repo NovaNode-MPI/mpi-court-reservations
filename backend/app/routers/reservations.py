@@ -13,6 +13,10 @@ from app.security import get_current_user
 router = APIRouter(prefix="/reservations", tags=["reservations"])
 
 
+def _is_valid_30_min_boundary(value: datetime) -> bool:
+    return value.minute in (0, 30) and value.second == 0 and value.microsecond == 0
+
+
 @router.get("", response_model=List[schemas.ReservationResponse])
 def list_my_reservations(
     db: Session = Depends(get_db),
@@ -87,6 +91,12 @@ def create_reservation(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="start_time must be in the future",
+        )
+
+    if not _is_valid_30_min_boundary(payload.start_time) or not _is_valid_30_min_boundary(payload.end_time):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="start_time and end_time must align to 30-minute boundaries",
         )
 
     if payload.start_time >= payload.end_time:
