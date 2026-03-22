@@ -66,8 +66,8 @@ def cancel_reservation(
     if reservation.user_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
 
-    if reservation.status != "canceled":
-        reservation.status = "canceled"
+    if reservation.status != models.RESERVATION_STATUS_CANCELED:
+        reservation.status = models.RESERVATION_STATUS_CANCELED
         db.commit()
         db.refresh(reservation)
 
@@ -96,7 +96,7 @@ def create_reservation(
     overlapping = (
         db.query(models.Reservation)
         .filter(models.Reservation.facility_id == payload.facility_id)
-        .filter(models.Reservation.status == "active")
+        .filter(models.Reservation.status == models.RESERVATION_STATUS_ACTIVE)
         .filter(models.Reservation.start_time < payload.end_time)
         .filter(models.Reservation.end_time > payload.start_time)
         .first()
@@ -112,7 +112,7 @@ def create_reservation(
         facility_id=payload.facility_id,
         start_time=payload.start_time,
         end_time=payload.end_time,
-        status="active",
+        status=models.RESERVATION_STATUS_ACTIVE,
     )
 
     db.add(reservation)
