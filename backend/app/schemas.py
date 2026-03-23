@@ -36,6 +36,11 @@ class ReservationCreateRequest(BaseModel):
     end_time: datetime
 
 
+class ReservationUpdateRequest(BaseModel):
+    start_time: datetime
+    end_time: datetime
+
+
 class ReservationResponse(BaseModel):
     id: int
     user_id: int
