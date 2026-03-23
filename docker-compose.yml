@@ -12,5 +12,24 @@ services:
     volumes:
       - mpi_db_data:/var/lib/postgresql/data
 
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: mpi_api
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql://mpi:mpi@db:5432/mpi
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: mpi
+      DB_USER: mpi
+      DB_PASSWORD: mpi
+    ports:
+      - "8000:8000"
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
+
 volumes:
   mpi_db_data:
