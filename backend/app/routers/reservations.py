@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -80,6 +81,14 @@ def create_reservation(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ) -> schemas.ReservationResponse:
+    now_utc = datetime.now(timezone.utc)
+
+    if payload.start_time < now_utc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="start_time must be in the future",
+        )
+
     if payload.start_time >= payload.end_time:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
