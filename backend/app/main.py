@@ -14,6 +14,12 @@ from app.routers.me import router as me_router
 from app.routers.reservations import router as reservations_router
 from app.routers.facilities import router as facilities_router
 
+from contextlib import asynccontextmanager
+from fastapi import FastAPI
+from env_validation import validate_env
+
+validate_env()
+
 app = FastAPI(title="MPI Court Reservations")
 
 app.add_middleware(
@@ -45,3 +51,11 @@ def health_db(db: Session = Depends(get_db)):
             status_code=503,
             content={"status": "error", "db": "unavailable"},
         )
+    
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    validate_env()
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
