@@ -10,6 +10,74 @@ from app import models, schemas
 from app.db import get_db
 from app.security import get_current_user
 
+COMMON_RESERVATION_ERROR_RESPONSES = {
+    401: {
+        "model": schemas.ErrorResponse,
+        "description": "Unauthorized",
+        "content": {
+            "application/json": {
+                "example": {
+                    "error_code": "unauthorized",
+                    "message": "Not authenticated",
+                    "details": None,
+                }
+            }
+        },
+    },
+    403: {
+        "model": schemas.ErrorResponse,
+        "description": "Forbidden",
+        "content": {
+            "application/json": {
+                "example": {
+                    "error_code": "forbidden",
+                    "message": "Forbidden",
+                    "details": None,
+                }
+            }
+        },
+    },
+    404: {
+        "model": schemas.ErrorResponse,
+        "description": "Not Found",
+        "content": {
+            "application/json": {
+                "example": {
+                    "error_code": "not_found",
+                    "message": "Reservation not found",
+                    "details": None,
+                }
+            }
+        },
+    },
+    422: {
+        "model": schemas.ErrorResponse,
+        "description": "Validation Error",
+        "content": {
+            "application/json": {
+                "example": {
+                    "error_code": "validation_error",
+                    "message": "Request validation failed",
+                    "details": [],
+                }
+            }
+        },
+    },
+    500: {
+        "model": schemas.ErrorResponse,
+        "description": "Internal Server Error",
+        "content": {
+            "application/json": {
+                "example": {
+                    "error_code": "internal_server_error",
+                    "message": "Internal server error",
+                    "details": None,
+                }
+            }
+        },
+    },
+}
+
 router = APIRouter(prefix="/reservations", tags=["reservations"])
 
 
@@ -39,16 +107,7 @@ def _is_valid_30_min_boundary(value: datetime) -> bool:
                 }
             },
         },
-        401: {
-            "description": "Not authenticated",
-            "content": {
-                "application/json": {
-                    "example": {
-                        "detail": "Not authenticated"
-                    }
-                }
-            },
-        },
+        **COMMON_RESERVATION_ERROR_RESPONSES,
     },
 )
 def list_my_reservations(
@@ -64,7 +123,11 @@ def list_my_reservations(
     return [schemas.ReservationResponse.model_validate(r) for r in reservations]
 
 
-@router.get("/{reservation_id}", response_model=schemas.ReservationResponse)
+@router.get(
+    "/{reservation_id}",
+    response_model=schemas.ReservationResponse,
+    responses=COMMON_RESERVATION_ERROR_RESPONSES,
+)
 def get_reservation_by_id(
     reservation_id: int,
     db: Session = Depends(get_db),
@@ -91,7 +154,61 @@ def get_reservation_by_id(
     return schemas.ReservationResponse.model_validate(reservation)
 
 
-@router.put("/{reservation_id}", response_model=schemas.ReservationResponse, status_code=status.HTTP_200_OK)
+@router.put(
+    "/{reservation_id}",
+    response_model=schemas.ReservationResponse,
+    status_code=status.HTTP_200_OK,
+    responses={
+        400: {
+            "model": schemas.ErrorResponse,
+            "description": "Bad Request",
+            "content": {
+                "application/json": {
+                    "examples": {
+                        "past-time": {
+                            "summary": "Past start time",
+                            "value": {
+                                "error_code": "bad_request",
+                                "message": "start_time must be in the future",
+                                "details": None,
+                            },
+                        },
+                        "invalid-interval": {
+                            "summary": "Invalid interval",
+                            "value": {
+                                "error_code": "bad_request",
+                                "message": "start_time must be earlier than end_time",
+                                "details": None,
+                            },
+                        },
+                        "invalid-slot": {
+                            "summary": "Invalid slot granularity",
+                            "value": {
+                                "error_code": "bad_request",
+                                "message": "start_time and end_time must align to 30-minute boundaries",
+                                "details": None,
+                            },
+                        },
+                    }
+                }
+            },
+        },
+        409: {
+            "model": schemas.ErrorResponse,
+            "description": "Conflict",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "error_code": "conflict",
+                        "message": "Time slot is already booked for this facility",
+                        "details": None,
+                    }
+                }
+            },
+        },
+        **COMMON_RESERVATION_ERROR_RESPONSES,
+    },
+)
 def update_reservation_time(
     reservation_id: int,
     payload: schemas.ReservationUpdateRequest,
@@ -160,7 +277,12 @@ def update_reservation_time(
     return schemas.ReservationResponse.model_validate(reservation)
 
 
-@router.delete("/{reservation_id}", response_model=schemas.ReservationResponse, status_code=status.HTTP_200_OK)
+@router.delete(
+    "/{reservation_id}",
+    response_model=schemas.ReservationResponse,
+    status_code=status.HTTP_200_OK,
+    responses=COMMON_RESERVATION_ERROR_RESPONSES,
+)
 def cancel_reservation(
     reservation_id: int,
     db: Session = Depends(get_db),
@@ -203,50 +325,66 @@ def cancel_reservation(
             },
         },
         400: {
-            "description": "Invalid reservation input",
+            "model": schemas.ErrorResponse,
+            "description": "Bad Request",
             "content": {
                 "application/json": {
                     "examples": {
                         "past-time": {
                             "summary": "Past start time",
-                            "value": {"detail": "start_time must be in the future"},
+                            "value": {
+                                "error_code": "bad_request",
+                                "message": "start_time must be in the future",
+                                "details": None,
+                            },
                         },
                         "invalid-interval": {
                             "summary": "Invalid interval",
-                            "value": {"detail": "start_time must be earlier than end_time"},
+                            "value": {
+                                "error_code": "bad_request",
+                                "message": "start_time must be earlier than end_time",
+                                "details": None,
+                            },
                         },
                         "invalid-slot": {
                             "summary": "Invalid slot granularity",
-                            "value": {"detail": "start_time and end_time must align to 30-minute boundaries"},
+                            "value": {
+                                "error_code": "bad_request",
+                                "message": "start_time and end_time must align to 30-minute boundaries",
+                                "details": None,
+                            },
                         },
                     }
                 }
             },
         },
         404: {
+            "model": schemas.ErrorResponse,
             "description": "Facility not found",
             "content": {
                 "application/json": {
-                    "example": {"detail": "Facility not found"}
+                    "example": {
+                        "error_code": "not_found",
+                        "message": "Facility not found",
+                        "details": None,
+                    }
                 }
             },
         },
         409: {
-            "description": "Overlap conflict",
+            "model": schemas.ErrorResponse,
+            "description": "Conflict",
             "content": {
                 "application/json": {
-                    "example": {"detail": "Time slot is already booked for this facility"}
+                    "example": {
+                        "error_code": "conflict",
+                        "message": "Time slot is already booked for this facility",
+                        "details": None,
+                    }
                 }
             },
         },
-        401: {
-            "description": "Not authenticated",
-            "content": {
-                "application/json": {
-                    "example": {"detail": "Not authenticated"}
-                }
-            },
-        },
+        **COMMON_RESERVATION_ERROR_RESPONSES,
     },
 )
 def create_reservation(
