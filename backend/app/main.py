@@ -1,3 +1,7 @@
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from app.config import CORS_ORIGINS
 from fastapi import Depends, FastAPI
 from fastapi.responses import JSONResponse
 from sqlalchemy import text
@@ -11,6 +15,14 @@ from app.routers.reservations import router as reservations_router
 from app.routers.facilities import router as facilities_router
 
 app = FastAPI(title="MPI Court Reservations")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=CORS_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "Accept"],
+)
 
 app.include_router(auth_router)
 app.include_router(me_router)
