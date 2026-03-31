@@ -7,6 +7,41 @@ from app import models, schemas
 from app.db import get_db
 from app.security import create_access_token, hash_password, verify_password
 
+COMMON_AUTH_ERROR_RESPONSES = {
+    422: {
+        "model": schemas.ErrorResponse,
+        "description": "Validation Error",
+        "content": {
+            "application/json": {
+                "example": {
+                    "error_code": "validation_error",
+                    "message": "Request validation failed",
+                    "details": [
+                        {
+                            "loc": ["body", "email"],
+                            "msg": "value is not a valid email address",
+                            "type": "value_error",
+                        }
+                    ],
+                }
+            }
+        },
+    },
+    500: {
+        "model": schemas.ErrorResponse,
+        "description": "Internal Server Error",
+        "content": {
+            "application/json": {
+                "example": {
+                    "error_code": "internal_server_error",
+                    "message": "Internal server error",
+                    "details": None,
+                }
+            }
+        },
+    },
+}
+
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
@@ -28,15 +63,19 @@ router = APIRouter(prefix="/auth", tags=["auth"])
             },
         },
         409: {
+            "model": schemas.ErrorResponse,
             "description": "Email already registered",
             "content": {
                 "application/json": {
                     "example": {
-                        "detail": "Email already registered"
+                        "error_code": "conflict",
+                        "message": "Email already registered",
+                        "details": None,
                     }
                 }
             },
         },
+        **COMMON_AUTH_ERROR_RESPONSES,
     },
 )
 def register(
@@ -85,15 +124,19 @@ def register(
             },
         },
         401: {
+            "model": schemas.ErrorResponse,
             "description": "Invalid credentials",
             "content": {
                 "application/json": {
                     "example": {
-                        "detail": "Invalid credentials"
+                        "error_code": "unauthorized",
+                        "message": "Invalid credentials",
+                        "details": None,
                     }
                 }
             },
         },
+        **COMMON_AUTH_ERROR_RESPONSES,
     },
 )
 def login(
