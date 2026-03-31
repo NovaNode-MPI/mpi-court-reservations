@@ -1,14 +1,28 @@
-name: CI
+name: Backend CI
 
 on:
   pull_request:
-    branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-ci.yml"
   push:
-    branches: [main]
+    branches:
+      - main
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-ci.yml"
+
+permissions:
+  contents: read
 
 jobs:
   backend-tests:
+    name: Backend tests
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: backend
 
     steps:
       - name: Checkout repository
@@ -18,14 +32,64 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: |
+            backend/requirements*.txt
+            backend/pyproject.toml
+            backend/poetry.lock
 
       - name: Install backend dependencies
-        working-directory: backend
+        shell: bash
         run: |
+          set -euxo pipefail
           python -m pip install --upgrade pip
-          python -m pip install -r requirements.txt
 
-      - name: Run backend tests
-        working-directory: backend
+          if [ -f requirements-dev.txt ]; then
+            pip install -r requirements-dev.txt
+          elif [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          elif [ -f pyproject.toml ]; then
+            pip install .
+            pip install pytest pytest-cov
+          else
+            echo "No dependency file found in backend/. Expected requirements-dev.txt, requirements.txt, or pyproject.toml."
+            exit 1
+          fi
+
+          python -m pytest --version
+
+      - name: Run pytest
+        shell: bash
         run: |
-          python -m pytest -v
+          set -euxo pipefail
+          pytest -ra --tb=short
+
+      - name: Check coverage support
+        id: coverage_check
+        shell: bash
+        run: |
+          set +e
+          python -c "import pytest_cov" >/dev/null 2>&1
+          if [ $? -eq 0 ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "pytest-cov is not installed, so coverage artifact generation will be skipped."
+          fi
+
+      - name: Generate coverage report
+        if: steps.coverage_check.outputs.enabled == 'true'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          pytest -ra --tb=short --cov=. --cov-report=term-missing --cov-report=xml --cov-report=html
+
+      - name: Upload coverage artifact
+        if: steps.coverage_check.outputs.enabled == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage-report
+          path: |
+            backend/coverage.xml
+            backend/htmlcov/
+          if-no-files-found: error
