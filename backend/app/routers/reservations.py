@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Body, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app import models, schemas
@@ -17,7 +17,40 @@ def _is_valid_30_min_boundary(value: datetime) -> bool:
     return value.minute in (0, 30) and value.second == 0 and value.microsecond == 0
 
 
-@router.get("", response_model=List[schemas.ReservationResponse])
+@router.get(
+    "",
+    response_model=List[schemas.ReservationResponse],
+    responses={
+        200: {
+            "description": "Current user's reservations",
+            "content": {
+                "application/json": {
+                    "example": [
+                        {
+                            "id": 1,
+                            "user_id": 1,
+                            "facility_id": 1,
+                            "start_time": "2026-04-01T10:00:00Z",
+                            "end_time": "2026-04-01T10:30:00Z",
+                            "status": "active",
+                            "created_at": "2026-03-31T12:00:00Z",
+                        }
+                    ]
+                }
+            },
+        },
+        401: {
+            "description": "Not authenticated",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "detail": "Not authenticated"
+                    }
+                }
+            },
+        },
+    },
+)
 def list_my_reservations(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
@@ -148,9 +181,88 @@ def cancel_reservation(
     return schemas.ReservationResponse.model_validate(reservation)
 
 
-@router.post("", response_model=schemas.ReservationResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "",
+    response_model=schemas.ReservationResponse,
+    status_code=status.HTTP_201_CREATED,
+    responses={
+        201: {
+            "description": "Reservation created",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "id": 1,
+                        "user_id": 1,
+                        "facility_id": 1,
+                        "start_time": "2026-04-01T10:00:00Z",
+                        "end_time": "2026-04-01T10:30:00Z",
+                        "status": "active",
+                        "created_at": "2026-03-31T12:00:00Z",
+                    }
+                }
+            },
+        },
+        400: {
+            "description": "Invalid reservation input",
+            "content": {
+                "application/json": {
+                    "examples": {
+                        "past-time": {
+                            "summary": "Past start time",
+                            "value": {"detail": "start_time must be in the future"},
+                        },
+                        "invalid-interval": {
+                            "summary": "Invalid interval",
+                            "value": {"detail": "start_time must be earlier than end_time"},
+                        },
+                        "invalid-slot": {
+                            "summary": "Invalid slot granularity",
+                            "value": {"detail": "start_time and end_time must align to 30-minute boundaries"},
+                        },
+                    }
+                }
+            },
+        },
+        404: {
+            "description": "Facility not found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Facility not found"}
+                }
+            },
+        },
+        409: {
+            "description": "Overlap conflict",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Time slot is already booked for this facility"}
+                }
+            },
+        },
+        401: {
+            "description": "Not authenticated",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Not authenticated"}
+                }
+            },
+        },
+    },
+)
 def create_reservation(
-    payload: schemas.ReservationCreateRequest,
+    payload: schemas.ReservationCreateRequest = Body(
+        ...,
+        examples={
+            "default": {
+                "summary": "Create reservation request",
+                "value": {
+                    "facility_id": 1,
+                    "start_time": "2026-04-01T10:00:00Z",
+                    "end_time": "2026-04-01T10:30:00Z",
+                },
+            }
+        },
+    ),
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ) -> schemas.ReservationResponse:
