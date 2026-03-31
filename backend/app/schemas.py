@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional
+from typing import Any, Optional
 
 from pydantic import BaseModel, EmailStr, Field
 
@@ -19,6 +19,12 @@ class LoginRequest(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+
+class ErrorResponse(BaseModel):
+    error_code: str
+    message: str
+    details: Optional[Any] = None
 
 
 class UserResponse(BaseModel):
