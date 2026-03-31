@@ -1,13 +1,10 @@
 from __future__ import annotations
 
+from contextlib import asynccontextmanager
+
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-
-from app.config import CORS_ORIGINS
-from fastapi import Depends, FastAPI
 from fastapi.responses import JSONResponse
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
@@ -17,11 +14,22 @@ from app import schemas
 from app.config import CORS_ORIGINS
 from app.db import get_db
 from app.routers.auth import router as auth_router
+from app.routers.facilities import router as facilities_router
 from app.routers.me import router as me_router
 from app.routers.reservations import router as reservations_router
-from app.routers.facilities import router as facilities_router
+from env_validation import validate_env
 
-app = FastAPI(title="MPI Court Reservations")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    validate_env()
+    yield
+
+
+app = FastAPI(
+    title="MPI Court Reservations",
+    lifespan=lifespan,
+)
 
 app.add_middleware(
     CORSMiddleware,

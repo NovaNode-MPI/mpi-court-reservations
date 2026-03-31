@@ -79,3 +79,11 @@ Clone the repository and start the local services:
 git clone https://github.com/NovaNode-MPI/mpi-court-reservations.git
 cd mpi-court-reservations
 make up
+
+
+### Backend environment setup
+
+Before running the backend locally, create a local environment file:
+
+```bash
+cp backend/.env.example backend/.env

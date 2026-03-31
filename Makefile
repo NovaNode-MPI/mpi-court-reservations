@@ -13,4 +13,4 @@ migrate:
 	cd $(BACKEND_DIR) && alembic upgrade head
 
 run:
-	cd $(BACKEND_DIR) && uvicorn main:app --reload
+	cd backend && uvicorn main:app --reload --env-file .env
