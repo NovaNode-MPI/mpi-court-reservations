@@ -49,11 +49,33 @@ Each champion owns the deliverables of their area. Implementation can be shared 
 
 ---
 
-## 4. Local Setup (How to run the project)
+## 4. Core Functionalities
 
-### Run with Docker (recommended)
+The current or planned application features include:
+
+- user registration and login
+- facility listing and browsing
+- reservation creation for a selected time slot
+- prevention of overlapping reservations
+- viewing existing reservations
+- cancellation of reservations
+- API documentation through Swagger/OpenAPI
+
+---
+
+## 5. Local Setup (How to run the project)
+
+### Prerequisites
+Before running the project locally, make sure you have:
+
+- **Docker Desktop**
+- **Python** installed locally if you want to run the backend outside Docker
+- the required backend dependencies installed in your local Python environment when using `make migrate` or `make run`
+
+### Run with Docker Compose
+Clone the repository and start the local services:
 
 ```bash
 git clone https://github.com/NovaNode-MPI/mpi-court-reservations.git
 cd mpi-court-reservations
-docker compose up --build
+make up
