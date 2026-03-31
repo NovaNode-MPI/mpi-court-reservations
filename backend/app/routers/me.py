@@ -25,11 +25,40 @@ router = APIRouter(prefix="/me", tags=["me"])
             },
         },
         401: {
+            "model": schemas.ErrorResponse,
             "description": "Not authenticated",
             "content": {
                 "application/json": {
                     "example": {
-                        "detail": "Not authenticated"
+                        "error_code": "unauthorized",
+                        "message": "Not authenticated",
+                        "details": None,
+                    }
+                }
+            },
+        },
+        422: {
+            "model": schemas.ErrorResponse,
+            "description": "Validation Error",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "error_code": "validation_error",
+                        "message": "Request validation failed",
+                        "details": [],
+                    }
+                }
+            },
+        },
+        500: {
+            "model": schemas.ErrorResponse,
+            "description": "Internal Server Error",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "error_code": "internal_server_error",
+                        "message": "Internal server error",
+                        "details": None,
                     }
                 }
             },

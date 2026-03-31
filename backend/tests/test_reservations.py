@@ -2,12 +2,19 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 
-from app import models
 from tests.conftest import auth_headers, create_user, login_and_get_token
 
 
 def iso(dt: datetime) -> str:
     return dt.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+
+
+def assert_error(response, status_code: int, error_code: str, message: str) -> None:
+    assert response.status_code == status_code
+    body = response.json()
+    assert body["error_code"] == error_code
+    assert body["message"] == message
+    assert body["details"] is None
 
 
 def test_valid_reservation_can_be_created(client, facility):
@@ -63,8 +70,12 @@ def test_overlapping_reservations_are_rejected(client, facility):
         headers=auth_headers(token),
     )
 
-    assert overlap.status_code == 409
-    assert overlap.json()["detail"] == "Time slot is already booked for this facility"
+    assert_error(
+        overlap,
+        409,
+        "conflict",
+        "Time slot is already booked for this facility",
+    )
 
 
 def test_invalid_time_interval_is_rejected(client, facility):
@@ -85,8 +96,12 @@ def test_invalid_time_interval_is_rejected(client, facility):
         headers=auth_headers(token),
     )
 
-    assert response.status_code == 400
-    assert response.json()["detail"] == "start_time must be earlier than end_time"
+    assert_error(
+        response,
+        400,
+        "bad_request",
+        "start_time must be earlier than end_time",
+    )
 
 
 def test_user_cannot_cancel_someone_elses_reservation(client, facility):
@@ -117,8 +132,12 @@ def test_user_cannot_cancel_someone_elses_reservation(client, facility):
         headers=auth_headers(other_token),
     )
 
-    assert cancel_response.status_code == 403
-    assert cancel_response.json()["detail"] == "Forbidden"
+    assert_error(
+        cancel_response,
+        403,
+        "forbidden",
+        "Forbidden",
+    )
 
 
 def test_listing_reservations_returns_only_authenticated_users_reservations(client, facility):
