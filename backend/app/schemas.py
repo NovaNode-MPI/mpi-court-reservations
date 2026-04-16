@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from decimal import Decimal
 from typing import Any, Optional
 
 from pydantic import BaseModel, EmailStr, Field
@@ -60,11 +61,22 @@ class ReservationResponse(BaseModel):
         from_attributes = True
 
 
+class FacilityPriceResponse(BaseModel):
+    id: int
+    duration: str
+    price: Decimal
+
+    class Config:
+        from_attributes = True
+
+
 class FacilityResponse(BaseModel):
     id: int
     name: str
     type: str
     location: Optional[str] = None
+    image_url: Optional[str] = None
+    prices: list[FacilityPriceResponse] = []
 
     class Config:
         from_attributes = True

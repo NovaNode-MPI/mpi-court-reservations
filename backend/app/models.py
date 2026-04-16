@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Index, func
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Index, func, Numeric
 from sqlalchemy.orm import relationship
 from .db import Base
 
@@ -26,9 +26,23 @@ class Facility(Base):
     type = Column(String(100), nullable=False)
     location = Column(String(255), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    image_url = Column(String(500), nullable=True)
     reservations = relationship("Reservation", back_populates="facility")
+    prices = relationship(
+        "FacilityPrice",
+        back_populates="facility",
+        cascade="all, delete-orphan"
+    )
 
+class FacilityPrice(Base):
+    __tablename__ = "facility_prices"
 
+    id = Column(Integer, primary_key=True)
+    facility_id = Column(Integer, ForeignKey("facilities.id", ondelete="CASCADE"), nullable=False)
+    duration = Column(String(50), nullable=False)
+    price = Column(Numeric(10, 2), nullable=False)
+
+    facility = relationship("Facility", back_populates="prices")
 class Reservation(Base):
     __tablename__ = "reservations"
     id = Column(Integer, primary_key=True)

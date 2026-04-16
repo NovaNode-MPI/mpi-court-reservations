@@ -24,9 +24,9 @@ searchInput.addEventListener("input", () => {
   const query = searchInput.value.toLowerCase().trim();
 
   const filtered = facilitiesData.filter((facility) =>
-    facility.name.toLowerCase().includes(query) ||
-    facility.type.toLowerCase().includes(query) ||
-    facility.location.toLowerCase().includes(query)
+    (facility.name || "").toLowerCase().includes(query) ||
+    (facility.type || "").toLowerCase().includes(query) ||
+    (facility.location || "").toLowerCase().includes(query)
   );
 
   if (filtered.length === 0) {
@@ -96,21 +96,28 @@ function renderFacilities(facilities) {
     const card = document.createElement("div");
     card.className = "facility-card";
 
+    const pricesHtml =
+      facility.prices && facility.prices.length > 0
+        ? facility.prices
+            .map((p) => `<li>${p.duration} - ${p.price} RON</li>`)
+            .join("")
+        : "<li>No pricing available.</li>";
+
+    const imageHtml = facility.image_url
+      ? `<img src="${facility.image_url}" alt="${facility.name}" />`
+      : `<div class="facility-image-placeholder">No image</div>`;
+
     card.innerHTML = `
       <div class="card-inner">
         <div class="card-front">
           <div class="facility-image">
-            ${
-              facility.image_url
-                ? `<img src="${facility.image_url}" alt="${facility.name}" />`
-                : "No image"
-            }
+            ${imageHtml}
           </div>
 
           <div class="facility-info">
-            <h3>${facility.name}</h3>
-            <p><strong>Type:</strong> ${facility.type}</p>
-            <p><strong>Location:</strong> ${facility.location}</p>
+            <h3>${facility.name || "Unnamed facility"}</h3>
+            <p><strong>Type:</strong> ${facility.type || "N/A"}</p>
+            <p><strong>Location:</strong> ${facility.location || "N/A"}</p>
             <button class="info-button">More info</button>
           </div>
         </div>
@@ -118,11 +125,7 @@ function renderFacilities(facilities) {
         <div class="card-back">
           <h4>Pricing</h4>
           <ul>
-            ${
-              facility.prices?.map(
-                (p) => `<li>${p.duration} - ${p.price} RON</li>`
-              ).join("") || "<li>No pricing available.</li>"
-            }
+            ${pricesHtml}
           </ul>
 
           <div class="card-back-buttons">

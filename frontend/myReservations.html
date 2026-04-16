@@ -8,30 +8,45 @@
 </head>
 <body>
   <header class="facilities-header">
-  <div class="search-row search-row-placeholder">
-    <div class="search-wrapper"></div>
-  </div>
+    <div class="search-row search-row-placeholder">
+      <div class="search-wrapper"></div>
+    </div>
 
-  <div class="actions-row">
-    <a href="/facilities.html" class="nav-action">
-      Facilities
-    </a>
+    <div class="actions-row">
+      <a href="/facilities.html" class="nav-action">
+        Facilities
+      </a>
 
-    <a href="/myReservations.html" class="nav-action active" aria-current="page">
-      My Reservations
-    </a>
+      <a href="/myReservations.html" class="nav-action active" aria-current="page">
+        My Reservations
+      </a>
 
-    <a href="#" id="logoutLink" class="nav-action">
-      Logout
-    </a>
-  </div>
-</header>
+      <a href="#" id="logoutLink" class="nav-action">
+        Logout
+      </a>
+    </div>
+  </header>
 
   <main class="facilities-page">
     <section class="page-intro">
       <h1>My Reservations</h1>
-      <p>No reservations yet.</p>
+      <p>See your booked facilities and time slots.</p>
     </section>
+
+    <section id="loadingState" class="state-message">
+      <p>Loading reservations...</p>
+    </section>
+
+    <section id="errorState" class="state-message hidden">
+      <p>Could not load reservations. Please try again.</p>
+      <button id="retryButton" type="button" class="retry-button">Retry</button>
+    </section>
+
+    <section id="emptyState" class="state-message hidden">
+      <p>You do not have any reservations yet.</p>
+    </section>
+
+    <section id="reservationsList" class="reservations-list hidden" aria-live="polite"></section>
   </main>
 
   <script type="module" src="/src/myReservations/myReservations.js"></script>
