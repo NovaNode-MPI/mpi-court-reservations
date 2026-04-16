@@ -25,3 +25,31 @@ export async function getMyReservations() {
 
   return data;
 }
+
+export async function createReservation(payload) {
+  const token = getToken();
+
+  const response = await fetch(`${API_BASE_URL}/reservations`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (response.status === 401) {
+    logout();
+    return;
+  }
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    const error = new Error(data?.detail || "Failed to create reservation");
+    error.status = response.status;
+    throw error;
+  }
+
+  return data;
+}

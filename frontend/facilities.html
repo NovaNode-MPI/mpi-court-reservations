@@ -59,7 +59,56 @@
       aria-live="polite"
     ></section>
   </main>
+  <section id="reservationModal" class="modal hidden" aria-hidden="true">
+  <div class="modal-overlay" id="modalOverlay"></div>
 
+  <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="reservationModalTitle">
+    <div class="modal-header">
+      <h2 id="reservationModalTitle">Create Reservation</h2>
+      <button type="button" id="closeModalButton" class="modal-close-button">×</button>
+    </div>
+
+    <form id="reservationForm" class="reservation-form">
+      <div class="form-group">
+        <label for="facilityNameInput">Facility</label>
+        <input id="facilityNameInput" type="text" readonly />
+        <input id="facilityIdInput" name="facility_id" type="hidden" />
+      </div>
+
+      <div class="form-group">
+  <label for="reservationDateInput">Date</label>
+  <input id="reservationDateInput" name="reservation_date" type="date" required />
+</div>
+
+<div class="form-group">
+  <label for="startSlotSelect">Start time</label>
+  <select id="startSlotSelect" name="start_slot" required></select>
+</div>
+
+<div class="form-group">
+  <label for="durationSelect">Duration</label>
+  <select id="durationSelect" name="duration" required></select>
+</div>
+
+<div class="form-group">
+  <label for="calculatedEndTime">End time</label>
+  <input id="calculatedEndTime" type="text" readonly />
+</div>
+
+<div class="form-group">
+  <label for="calculatedPrice">Price</label>
+  <input id="calculatedPrice" type="text" readonly />
+</div>
+
+      <div id="reservationFormMessage" class="form-message hidden"></div>
+
+      <div class="modal-actions">
+        <button type="submit" class="book-button">Confirm reservation</button>
+        <button type="button" id="cancelModalButton" class="back-button">Cancel</button>
+      </div>
+    </form>
+  </div>
+</section>
   <script type="module" src="/src/facilities/facilities.js"></script>
 </body>
 </html>
