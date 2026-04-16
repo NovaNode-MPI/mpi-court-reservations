@@ -1,0 +1,5 @@
+@import "../facilities/facilities.css";
+
+.header-spacer {
+  flex: 1;
+}

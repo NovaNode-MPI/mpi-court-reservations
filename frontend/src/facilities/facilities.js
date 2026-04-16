@@ -8,16 +8,14 @@ const errorState = document.getElementById("errorState");
 const emptyState = document.getElementById("emptyState");
 const facilitiesGrid = document.getElementById("facilitiesGrid");
 const retryButton = document.getElementById("retryButton");
-const logoutButton = document.getElementById("logoutButton");
-const accountButton = document.getElementById("accountButton");
+const logoutLink = document.getElementById("logoutLink");
 const searchInput = document.getElementById("searchInput");
 
 let facilitiesData = [];
 
-logoutButton.addEventListener("click", logout);
-
-accountButton.addEventListener("click", () => {
-  alert("Account page will be added later.");
+logoutLink.addEventListener("click", (event) => {
+  event.preventDefault();
+  logout();
 });
 
 retryButton.addEventListener("click", loadFacilities);
